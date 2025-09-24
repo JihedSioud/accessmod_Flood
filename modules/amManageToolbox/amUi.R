@@ -58,6 +58,18 @@ toolInlineBtn <- div(
     class = "btn btn-default btn-inline",
     tags$input(
       type = "radio",
+      id = "tool4",
+      name = "toolSelector",
+      value = "tool_flood_landcover"
+    ),
+    icon("water"), amt(
+      id = "tools_flood_lc_btn"
+    )
+  ),
+  tags$label(
+    class = "btn btn-default btn-inline",
+    tags$input(
+      type = "radio",
       id = "tool3",
       name = "toolSelector",
       value = "tool_pop_correction"
@@ -81,6 +93,12 @@ fluidRow(
       input.toolSelector=='tool_merge_landcover'
       ",
       loadUi("modules/amAnalysisMergeLandCover/amUi.R")
+    ),
+    conditionalPanel(
+      condition = "
+      input.toolSelector=='tool_flood_landcover'
+      ",
+      loadUi("modules/amAnalysisFloodLandCover/amUi.R")
     ),
     conditionalPanel(
       condition = "

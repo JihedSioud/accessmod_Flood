@@ -4737,7 +4737,7 @@
   },
   {
     "id": "project_open_title",
-    "en": "Open",
+    "en": "Open project or DEM",
     "fr": "Ouvrir",
     "es": "Abrir",
     "de": "",
@@ -5046,6 +5046,310 @@
     "es": "Ajustar la distribución de la población",
     "de": "",
     "pt": "Ajustar a distribuição da população"
+  },
+  {
+    "id": "tools_flood_lc_btn",
+    "en": "Create land cover with flood",
+    "fr": "Créer une occupation du sol avec inondation",
+    "es": "Crear cobertura de suelo con inundación",
+    "de": "",
+    "pt": "Criar cobertura do solo com inundação"
+  },
+  {
+    "id": "toolbox_flood_lc_title",
+    "en": "Create land cover with flood",
+    "fr": "Créer une occupation du sol avec inondation",
+    "es": "Crear cobertura de suelo con inundación",
+    "de": "",
+    "pt": "Criar cobertura do solo com inundação"
+  },
+  {
+    "id": "toolbox_flood_lc_subtitle",
+    "en": "Merge flood intervals with an existing land cover.",
+    "fr": "Fusionner des intervalles d'inondation avec une occupation du sol.",
+    "es": "Combinar intervalos de inundación con una cobertura de suelo existente.",
+    "de": "",
+    "pt": "Fundir intervalos de inundação com uma cobertura do solo existente."
+  },
+  {
+    "id": "toolbox_flood_lc_select_flood",
+    "en": "Flood map raster",
+    "fr": "Raster de carte d'inondation",
+    "es": "Raster de mapa de inundación",
+    "de": "",
+    "pt": "Raster de mapa de inundação"
+  },
+  {
+    "id": "toolbox_flood_lc_select_landcover",
+    "en": "Land cover merged raster",
+    "fr": "Raster d'occupation du sol fusionné",
+    "es": "Raster de cobertura de suelo fusionado",
+    "de": "",
+    "pt": "Raster de cobertura do solo fundido"
+  },
+  {
+    "id": "toolbox_flood_lc_select_scenario",
+    "en": "Scenario table",
+    "fr": "Table de scénario",
+    "es": "Tabla de escenario",
+    "de": "",
+    "pt": "Tabela de cenário"
+  },
+  {
+    "id": "toolbox_flood_lc_select_landcover_table",
+    "en": "Land cover table",
+    "fr": "Table d'occupation du sol",
+    "es": "Tabla de cobertura de suelo",
+    "de": "",
+    "pt": "Tabela de cobertura do solo"
+  },
+  {
+    "id": "toolbox_flood_lc_intervals_heading",
+    "en": "Flood intervals",
+    "fr": "Intervalles d'inondation",
+    "es": "Intervalos de inundación",
+    "de": "",
+    "pt": "Intervalos de inundação"
+  },
+  {
+    "id": "toolbox_flood_lc_intervals_hint",
+    "en": "Configure ordered flood thresholds and speed modifiers.",
+    "fr": "Configurer des seuils d'inondation ordonnés et des modificateurs de vitesse.",
+    "es": "Configure umbrales de inundación ordenados y modificadores de velocidad.",
+    "de": "",
+    "pt": "Configurar limites de inundação ordenados e modificadores de velocidade."
+  },
+  {
+    "id": "toolbox_flood_lc_add_interval",
+    "en": "Add interval",
+    "fr": "Ajouter un intervalle",
+    "es": "Añadir intervalo",
+    "de": "",
+    "pt": "Adicionar intervalo"
+  },
+  {
+    "id": "toolbox_flood_lc_remove_interval",
+    "en": "Remove interval",
+    "fr": "Supprimer un intervalle",
+    "es": "Eliminar intervalo",
+    "de": "",
+    "pt": "Remover intervalo"
+  },
+  {
+    "id": "toolbox_flood_lc_tag_label",
+    "en": "Short tag",
+    "fr": "Tag court",
+    "es": "Etiqueta corta",
+    "de": "",
+    "pt": "Etiqueta curta"
+  },
+  {
+    "id": "toolbox_flood_lc_generate_btn",
+    "en": "Generate flood land cover",
+    "fr": "Générer l'occupation du sol inondation",
+    "es": "Generar cobertura de suelo con inundación",
+    "de": "",
+    "pt": "Gerar cobertura do solo com inundação"
+  },
+  {
+    "id": "toolbox_flood_lc_result_heading",
+    "en": "Results",
+    "fr": "Résultats",
+    "es": "Resultados",
+    "de": "",
+    "pt": "Resultados"
+  },
+  {
+    "id": "toolbox_flood_lc_interval_column",
+    "en": "Interval",
+    "fr": "Intervalle",
+    "es": "Intervalo",
+    "de": "",
+    "pt": "Intervalo"
+  },
+  {
+    "id": "toolbox_flood_lc_upper_column",
+    "en": "Upper bound",
+    "fr": "Borne supérieure",
+    "es": "Límite superior",
+    "de": "",
+    "pt": "Limite superior"
+  },
+  {
+    "id": "toolbox_flood_lc_speed_column",
+    "en": "Speed modifier",
+    "fr": "Modificateur de vitesse",
+    "es": "Modificador de velocidad",
+    "de": "",
+    "pt": "Modificador de velocidade"
+  },
+  {
+    "id": "toolbox_flood_lc_interval_label",
+    "en": "Interval",
+    "fr": "Intervalle",
+    "es": "Intervalo",
+    "de": "",
+    "pt": "Intervalo"
+  },
+  {
+    "id": "toolbox_flood_lc_no_upper",
+    "en": "No upper limit",
+    "fr": "Pas de limite supérieure",
+    "es": "Sin límite superior",
+    "de": "",
+    "pt": "Sem limite superior"
+  },
+  {
+    "id": "toolbox_flood_lc_speed_fixed",
+    "en": "1 (fixed)",
+    "fr": "1 (fixe)",
+    "es": "1 (fijo)",
+    "de": "",
+    "pt": "1 (fixo)"
+  },
+  {
+    "id": "srv_flood_lc_missing_flood_raster",
+    "en": "Select a flood map raster.",
+    "fr": "Sélectionnez un raster de carte d'inondation.",
+    "es": "Seleccione un raster de mapa de inundación.",
+    "de": "",
+    "pt": "Selecione um raster de mapa de inundação."
+  },
+  {
+    "id": "srv_flood_lc_missing_landcover_raster",
+    "en": "Select a land cover merged raster.",
+    "fr": "Sélectionnez un raster d'occupation du sol fusionné.",
+    "es": "Seleccione un raster de cobertura de suelo fusionado.",
+    "de": "",
+    "pt": "Selecione um raster de cobertura do solo fundido."
+  },
+  {
+    "id": "srv_flood_lc_missing_scenario_table",
+    "en": "Select a scenario table.",
+    "fr": "Sélectionnez une table de scénario.",
+    "es": "Seleccione una tabla de escenario.",
+    "de": "",
+    "pt": "Selecione uma tabela de cenário."
+  },
+  {
+    "id": "srv_flood_lc_missing_landcover_table",
+    "en": "Select a land cover table.",
+    "fr": "Sélectionnez une table d'occupation du sol.",
+    "es": "Seleccione una tabla de cobertura de suelo.",
+    "de": "",
+    "pt": "Selecione uma tabela de cobertura do solo."
+  },
+  {
+    "id": "srv_flood_lc_missing_tag",
+    "en": "Enter at least one tag.",
+    "fr": "Saisissez au moins un tag.",
+    "es": "Introduzca al menos una etiqueta.",
+    "de": "",
+    "pt": "Introduza pelo menos uma etiqueta."
+  },
+  {
+    "id": "srv_flood_lc_invalid_threshold",
+    "en": "Provide numeric upper bounds for each interval.",
+    "fr": "Fournissez des bornes supérieures numériques pour chaque intervalle.",
+    "es": "Proporcione límites superiores numéricos para cada intervalo.",
+    "de": "",
+    "pt": "Forneça limites superiores numéricos para cada intervalo."
+  },
+  {
+    "id": "srv_flood_lc_threshold_order",
+    "en": "Intervals must be in strictly increasing order.",
+    "fr": "Les intervalles doivent être strictement croissants.",
+    "es": "Los intervalos deben estar en orden estrictamente creciente.",
+    "de": "",
+    "pt": "Os intervalos devem estar em ordem estritamente crescente."
+  },
+  {
+    "id": "srv_flood_lc_missing_speed",
+    "en": "Provide speed modifiers for every interval.",
+    "fr": "Fournissez des modificateurs de vitesse pour chaque intervalle.",
+    "es": "Proporcione modificadores de velocidad para cada intervalo.",
+    "de": "",
+    "pt": "Forneça modificadores de velocidade para cada intervalo."
+  },
+  {
+    "id": "srv_flood_lc_speed_positive",
+    "en": "Speed modifiers must be greater than zero.",
+    "fr": "Les modificateurs de vitesse doivent être supérieurs à zéro.",
+    "es": "Los modificadores de velocidad deben ser mayores que cero.",
+    "de": "",
+    "pt": "Os modificadores de velocidade devem ser maiores que zero."
+  },
+  {
+    "id": "srv_flood_lc_validation_issues",
+    "en": "Issues detected",
+    "fr": "Problèmes détectés",
+    "es": "Problemas detectados",
+    "de": "",
+    "pt": "Problemas detectados"
+  },
+  {
+    "id": "srv_flood_lc_outputs_notice",
+    "en": "Outputs to be generated",
+    "fr": "Jeux de données générés",
+    "es": "Salidas a generar",
+    "de": "",
+    "pt": "Resultados a gerar"
+  },
+  {
+    "id": "srv_flood_lc_invalid_inputs",
+    "en": "Fix validation issues before generating.",
+    "fr": "Corrigez les problèmes de validation avant de générer.",
+    "es": "Corrija los problemas de validación antes de generar.",
+    "de": "",
+    "pt": "Corrija os problemas de validação antes de gerar."
+  },
+  {
+    "id": "srv_flood_lc_progress_title",
+    "en": "Create land cover with flood",
+    "fr": "Créer une occupation du sol avec inondation",
+    "es": "Crear cobertura de suelo con inundación",
+    "de": "",
+    "pt": "Criar cobertura do solo com inundação"
+  },
+  {
+    "id": "srv_flood_lc_progress_prepare",
+    "en": "Preparing inputs...",
+    "fr": "Préparation des entrées...",
+    "es": "Preparando entradas...",
+    "de": "",
+    "pt": "A preparar entradas..."
+  },
+  {
+    "id": "srv_flood_lc_progress_intervals",
+    "en": "Generating flood intervals raster...",
+    "fr": "Génération du raster des intervalles d'inondation...",
+    "es": "Generando raster de intervalos de inundación...",
+    "de": "",
+    "pt": "A gerar o raster de intervalos de inundação..."
+  },
+  {
+    "id": "srv_flood_lc_progress_merge",
+    "en": "Merging flood and land cover rasters...",
+    "fr": "Fusion des rasters d'inondation et d'occupation du sol...",
+    "es": "Combinando los raster de inundación y cobertura de suelo...",
+    "de": "",
+    "pt": "A fundir os rasters de inundação e cobertura do solo..."
+  },
+  {
+    "id": "srv_flood_lc_progress_tables",
+    "en": "Building land cover and scenario tables...",
+    "fr": "Création des tables d'occupation du sol et de scénario...",
+    "es": "Creando tablas de cobertura de suelo y escenario...",
+    "de": "",
+    "pt": "A criar tabelas de cobertura do solo e cenário..."
+  },
+  {
+    "id": "srv_flood_lc_process_done",
+    "en": "Flood land cover created.",
+    "fr": "Occupation du sol inondation créée.",
+    "es": "Cobertura de suelo de inundación creada.",
+    "de": "",
+    "pt": "Cobertura do solo de inundação criada."
   },
   {
     "id": "toolbox_popcor_config_title",

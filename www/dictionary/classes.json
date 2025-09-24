@@ -187,6 +187,39 @@
     "internal": false
   },
   {
+    "class": "rFloodMap",
+    "en": "Flood Map",
+    "fr": "Carte des inondations",
+    "es": "Mapa de inundaciones",
+    "pt": "Mapa de inundações",
+    "type": "raster",
+    "colors": "bcyr&e",
+    "importable": true,
+    "internal": false
+  },
+  {
+    "class": "rFloodIntervals",
+    "en": "Flood with intervals",
+    "fr": "Inondation par intervalles",
+    "es": "Inundación por intervalos",
+    "pt": "Inundação por intervalos",
+    "type": "raster",
+    "colors": "bcyr&e",
+    "importable": false,
+    "internal": false
+  },
+  {
+    "class": "rLandCoverFloodMerged",
+    "en": "Merged land cover with flood",
+    "fr": "Occupation du sol fusionnée avec inondation",
+    "es": "Cobertura del suelo fusionada con inundación",
+    "pt": "Cobertura do solo fundida com inundação",
+    "type": "raster",
+    "colors": "random",
+    "importable": false,
+    "internal": false
+  },
+  {
     "class": "vBarrier",
     "en": "barrier",
     "fr": "barrière",

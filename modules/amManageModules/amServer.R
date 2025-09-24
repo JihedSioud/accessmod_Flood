@@ -54,6 +54,7 @@ for (m in modList) {
     "amGisPreview",
     "amManageProject",
     "amAnalysisMergeLandCover",
+    "amAnalysisFloodLandCover",
     "amAnalysisAccessibility",
     "amManageSettings",
     "amManageLogs",
