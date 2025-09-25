@@ -47,9 +47,130 @@ safeNumeric <- function(x) {
   suppressWarnings(as.numeric(x))
 }
 
+parseGrassColorSpec <- function(spec) {
+  if (is.null(spec) || length(spec) == 0) {
+    return(NULL)
+  }
+  spec <- as.character(spec[1])
+  if (is.na(spec)) {
+    return(NULL)
+  }
+  spec <- trimws(spec)
+  if (!nzchar(spec)) {
+    return(NULL)
+  }
+  parts <- strsplit(spec, "&", fixed = TRUE)[[1]]
+  palette <- trimws(parts[1])
+  if (!nzchar(palette)) {
+    return(NULL)
+  }
+  extra <- parts[-1]
+  flags <- character(0)
+  if (length(extra) > 0) {
+    flagChars <- paste(extra, collapse = "")
+    flagChars <- gsub("[^A-Za-z]", "", flagChars)
+    if (nzchar(flagChars)) {
+      flags <- unique(strsplit(flagChars, "")[[1]])
+    }
+  }
+  list(palette = palette, flags = flags)
+}
+
+applyGrassColor <- function(map, colorSpec) {
+  parsed <- parseGrassColorSpec(colorSpec)
+  if (is.null(parsed)) {
+    return(invisible(NULL))
+  }
+  tryCatch(
+    {
+      execGRASS(
+        "r.colors",
+        map = map,
+        color = parsed$palette,
+        flags = parsed$flags
+      )
+    },
+    error = function(e) {
+      amDebugMsg(sprintf("Failed to apply color '%s' on map '%s': %s", colorSpec, map, e$message))
+    }
+  )
+  invisible(NULL)
+}
+
+floodLcMinIntervals <- 2L
+floodLcMaxIntervals <- 10L
+
+floodLcDefaultIntervals <- function() {
+  data.frame(
+    upper = c(0, NA_real_),
+    speed = c(1, 1),
+    stringsAsFactors = FALSE
+  )
+}
+
+sanitizeFloodLcIntervals <- function(df) {
+  if (!is.data.frame(df) || nrow(df) < floodLcMinIntervals) {
+    df <- floodLcDefaultIntervals()
+  }
+  if (!"upper" %in% names(df)) {
+    df$upper <- NA_real_
+  }
+  if (!"speed" %in% names(df)) {
+    df$speed <- 1
+  }
+  df <- df[, c("upper", "speed"), drop = FALSE]
+  df$upper <- suppressWarnings(as.numeric(df$upper))
+  df$speed <- suppressWarnings(as.numeric(df$speed))
+  df$upper[!is.finite(df$upper)] <- NA_real_
+  df$speed[!is.finite(df$speed)] <- NA_real_
+  df <- df[seq_len(min(nrow(df), floodLcMaxIntervals)), , drop = FALSE]
+  if (nrow(df) < floodLcMinIntervals) {
+    df <- floodLcDefaultIntervals()
+  }
+  df$speed[is.na(df$speed)] <- NA_real_
+  df$speed[1] <- 1
+  df$upper[nrow(df)] <- NA_real_
+  rownames(df) <- NULL
+  df
+}
+
+floodLcIntervalsForDisplay <- function(df) {
+  df <- sanitizeFloodLcIntervals(df)
+  data.frame(
+    interval = seq_len(nrow(df)),
+    upper = df$upper,
+    speed = df$speed,
+    stringsAsFactors = FALSE
+  )
+}
+
+collectFloodLcIntervals <- function() {
+  tbl <- tabulator_to_df(input$floodLcIntervalsTable_data)
+  if (is.data.frame(tbl) && nrow(tbl) > 0) {
+    df <- data.frame(
+      upper = tbl$upper,
+      speed = tbl$speed,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    df <- listen$floodLcIntervalsDf
+    if (is.null(df)) {
+      df <- floodLcDefaultIntervals()
+    }
+  }
+  sanitizeFloodLcIntervals(df)
+}
+observe({
+  if (is.null(listen$floodLcIntervalsDf)) {
+    listen$floodLcIntervalsDf <- floodLcDefaultIntervals()
+  }
+},
+  suspended = TRUE
+) %>% amStoreObs(idModule, "flood_lc_init_intervals")
+
 buildIntervalMetadata <- function(thresholds, speeds) {
   n <- length(speeds)
-  offsets <- seq(0, by = 5000, length.out = n)
+  offsets <- seq.int(0L, by = 5000L, length.out = n)
   fmt <- if (length(thresholds) > 0) {
     vapply(thresholds, trimNumeric, character(1))
   } else {
@@ -62,9 +183,11 @@ buildIntervalMetadata <- function(thresholds, speeds) {
   }
   labelsSuffix <- character(n)
   labelsHuman <- character(n)
+  labelsCategory <- character(n)
   if (n >= 1) {
     labelsSuffix[1] <- paste0("Under_", fmtSuffix[1])
     labelsHuman[1] <- if (!is.na(fmt[1])) sprintf("< %s", fmt[1]) else "< ?"
+    labelsCategory[1] <- if (!is.na(fmt[1])) sprintf("Under_%s", fmt[1]) else "Under"
   }
   if (n > 2) {
     for (i in 2:(n - 1)) {
@@ -74,19 +197,34 @@ buildIntervalMetadata <- function(thresholds, speeds) {
       } else {
         "?"
       }
+      labelsCategory[i] <- if (!any(is.na(fmt[c(i - 1, i)]))) {
+        sprintf("Between_%s_and_%s", fmt[i - 1], fmt[i])
+      } else {
+        sprintf("Between_%d", offsets[i])
+      }
     }
   }
   if (n >= 2) {
     labelsSuffix[n] <- paste0("Over_", fmtSuffix[n - 1])
     labelsHuman[n] <- if (!is.na(fmt[n - 1])) sprintf(">= %s", fmt[n - 1]) else ">= ?"
+    labelsCategory[n] <- if (!is.na(fmt[n - 1])) sprintf("Over_%s", fmt[n - 1]) else "Over"
   }
+  labelsSuffix[is.na(labelsSuffix) | labelsSuffix == ""] <- sprintf("Offset_%d", offsets[is.na(labelsSuffix) | labelsSuffix == ""])
+  labelsHuman[is.na(labelsHuman) | labelsHuman == ""] <- sprintf("Offset %d", offsets[is.na(labelsHuman) | labelsHuman == ""])
+  labelsCategory <- gsub("[^0-9A-Za-z]+", "_", labelsCategory)
+  labelsCategory <- gsub("_+", "_", labelsCategory)
+  labelsCategory <- gsub("^_+|_+$", "", labelsCategory)
+  labelsCategory[labelsCategory == ""] <- sprintf("cat_%d", offsets[labelsCategory == ""])
+  numericOnly <- grepl("^[0-9]+$", labelsCategory)
+  labelsCategory[numericOnly] <- paste0("cat_", labelsCategory[numericOnly])
   list(
     thresholds = thresholds,
     speeds = speeds,
     offsets = offsets,
     labelSuffix = labelsSuffix,
     labelHuman = labelsHuman,
-    labelFormatted = fmt
+    labelFormatted = fmt,
+    labelCategory = labelsCategory
   )
 }
 
@@ -120,33 +258,6 @@ buildFloodExpression <- function(outName, srcName, thresholds, values) {
   )
 }
 
-intervalLabelPreview <- function(index, thresholds) {
-  if (length(thresholds) == 0) {
-    return("?")
-  }
-  fmt <- vapply(thresholds, trimNumeric, character(1))
-  if (index == 1) {
-    return(ifelse(is.na(fmt[1]), "< ?", sprintf("< %s", fmt[1])))
-  }
-  if (index > length(thresholds)) {
-    last <- fmt[length(thresholds)]
-    return(ifelse(is.na(last), ">= ?", sprintf(">= %s", last)))
-  }
-  prev <- fmt[index - 1]
-  curr <- fmt[index]
-  if (any(is.na(c(prev, curr)))) {
-    return("?")
-  }
-  sprintf("%s - %s", prev, curr)
-}
-
-# Ensure interval count initialised
-observe({
-  if (is.null(listen$floodLcIntervalCount)) {
-    listen$floodLcIntervalCount <- 2
-  }
-}) %>% amStoreObs(idModule, "flood_lc_init_count")
-
 # Update selectable datasets when data list changes
 observeEvent(listen$dataListUpdated,
   {
@@ -174,31 +285,109 @@ observeEvent(listen$dataListUpdated,
   suspended = TRUE
 ) %>% amStoreObs(idModule, "flood_lc_update_choices")
 
+# Render interval configuration table using tabulator
+output$floodLcIntervalsTable <- render_tabulator({
+  intervals <- isolate(floodLcIntervalsForDisplay(listen$floodLcIntervalsDf))
+  tabulator(
+    data = intervals,
+    readOnly = FALSE,
+    option = list(layout = "fitColumns"),
+    columns = list(
+      list(
+        title = ams("toolbox_flood_lc_interval_column"),
+        field = "interval",
+        editor = FALSE,
+        headerSort = FALSE
+      ),
+      list(
+        title = ams("toolbox_flood_lc_upper_column"),
+        field = "upper",
+        sorter = "number",
+        editor = "number"
+      ),
+      list(
+        title = ams("toolbox_flood_lc_speed_column"),
+        field = "speed",
+        sorter = "number",
+        editor = "number"
+      )
+    )
+  )
+})
+
+updateFloodLcIntervalTable <- function(df = NULL) {
+  if (is.null(df)) {
+    df <- listen$floodLcIntervalsDf
+  }
+  df <- sanitizeFloodLcIntervals(df)
+  listen$floodLcIntervalsDf <- df
+  current <- tabulator_to_df(input$floodLcIntervalsTable_data)
+  if (is.null(current)) {
+    return(invisible(df))
+  }
+  proxy <- tabulator_proxy("floodLcIntervalsTable")
+  display <- floodLcIntervalsForDisplay(df)
+  tabulator_update_data(proxy, display)
+  invisible(df)
+}
+
+# Sync backend when table data changes
+observeEvent(input$floodLcIntervalsTable_data,
+  {
+    tbl <- tabulator_to_df(input$floodLcIntervalsTable_data)
+    if (is.null(tbl) || nrow(tbl) == 0) {
+      return()
+    }
+    current <- data.frame(
+      upper = tbl$upper,
+      speed = tbl$speed,
+      stringsAsFactors = FALSE
+    )
+    sanitized <- sanitizeFloodLcIntervals(current)
+    listen$floodLcIntervalsDf <- sanitized
+    desired <- floodLcIntervalsForDisplay(sanitized)
+    tblDisplay <- data.frame(
+      interval = if ("interval" %in% names(tbl)) tbl$interval else seq_len(nrow(tbl)),
+      upper = suppressWarnings(as.numeric(tbl$upper)),
+      speed = suppressWarnings(as.numeric(tbl$speed)),
+      stringsAsFactors = FALSE
+    )
+    tblDisplay$speed[1] <- 1
+    tblDisplay$interval <- seq_len(nrow(tblDisplay))
+    tblDisplay$upper[nrow(tblDisplay)] <- NA_real_
+    if (!identical(desired, tblDisplay)) {
+      updateFloodLcIntervalTable(sanitized)
+    }
+  },
+  ignoreNULL = TRUE,
+  suspended = TRUE
+) %>% amStoreObs(idModule, "flood_lc_sync_table")
+
 # Interval add/remove handlers
 observeEvent(input$floodLcAddInterval,
   {
-    count <- isolate(listen$floodLcIntervalCount)
-    if (is.null(count) || length(count) == 0 || !is.numeric(count) || any(!is.finite(count))) {
-      count <- 2
+    df <- collectFloodLcIntervals()
+    if (nrow(df) >= floodLcMaxIntervals) {
+      return()
     }
-    count <- max(2, min(10, as.integer(count)))
-    if (count < 10) {
-      listen$floodLcIntervalCount <- count + 1
-    }
+    df <- rbind(df, data.frame(
+      upper = NA_real_,
+      speed = 1,
+      stringsAsFactors = FALSE
+    ))
+    updateFloodLcIntervalTable(df)
   },
   suspended = TRUE
 ) %>% amStoreObs(idModule, "flood_lc_add_interval")
 
 observeEvent(input$floodLcRemoveInterval,
   {
-    count <- isolate(listen$floodLcIntervalCount)
-    if (is.null(count) || length(count) == 0 || !is.numeric(count) || any(!is.finite(count))) {
-      count <- 2
+    df <- collectFloodLcIntervals()
+    if (nrow(df) <= floodLcMinIntervals) {
+      return()
     }
-    count <- max(2, min(10, as.integer(count)))
-    if (count > 2) {
-      listen$floodLcIntervalCount <- count - 1
-    }
+    df <- df[-nrow(df), , drop = FALSE]
+    updateFloodLcIntervalTable(df)
   },
   suspended = TRUE
 ) %>% amStoreObs(idModule, "flood_lc_remove_interval")
@@ -206,101 +395,23 @@ observeEvent(input$floodLcRemoveInterval,
 # Toggle add/remove buttons based on interval count
 observe(
   {
-    count <- listen$floodLcIntervalCount
-    if (is.null(count) || length(count) == 0 || !is.numeric(count) || any(!is.finite(count))) {
-      count <- 2
-    }
-    count <- max(2, min(10, as.integer(count)))
-    listen$floodLcIntervalCount <- count
-    amActionButtonToggle("floodLcAddInterval", session, disable = count >= 10)
-    amActionButtonToggle("floodLcRemoveInterval", session, disable = count <= 2)
+    df <- collectFloodLcIntervals()
+    count <- nrow(df)
+    amActionButtonToggle("floodLcAddInterval", session, disable = count >= floodLcMaxIntervals)
+    amActionButtonToggle("floodLcRemoveInterval", session, disable = count <= floodLcMinIntervals)
   },
   suspended = TRUE
 ) %>% amStoreObs(idModule, "flood_lc_toggle_interval_btns")
-
-# Render interval configuration table
-output$floodLcIntervals <- renderUI({
-  count <- listen$floodLcIntervalCount
-  if (is.null(count) || count < 2) {
-    count <- 2
-  }
-  thresholds <- if (count > 1) {
-    vapply(seq_len(count - 1), function(i) safeNumeric(input[[paste0("floodLc_threshold_", i)]]), numeric(1))
-  } else {
-    numeric(0)
-  }
-  header <- tags$thead(
-    tags$tr(
-      tags$th(ams("toolbox_flood_lc_interval_column")),
-      tags$th(ams("toolbox_flood_lc_upper_column")),
-      tags$th(ams("toolbox_flood_lc_speed_column"))
-    )
-  )
-  rows <- lapply(seq_len(count), function(i) {
-    label <- sprintf("%s %d", ams("toolbox_flood_lc_interval_label"), i)
-    upperInput <- if (i < count) {
-      value <- thresholds[i]
-      if (is.na(value)) value <- 0
-      numericInput(
-        inputId = paste0("floodLc_threshold_", i),
-        label = NULL,
-        value = value,
-        min = NULL,
-        step = 0.01,
-        width = "100%"
-      )
-    } else {
-      tags$span(class = "text-muted", ams("toolbox_flood_lc_no_upper"))
-    }
-    speedInput <- if (i == 1) {
-      tags$span(class = "text-muted", ams("toolbox_flood_lc_speed_fixed"))
-    } else {
-      value <- safeNumeric(input[[paste0("floodLc_speed_", i)]])
-      if (is.na(value)) value <- 1
-      numericInput(
-        inputId = paste0("floodLc_speed_", i),
-        label = NULL,
-        value = value,
-        min = 0,
-        step = 0.1,
-        width = "100%"
-      )
-    }
-    hint <- intervalLabelPreview(i, thresholds)
-    tags$tr(
-      tags$td(
-        tags$div(label),
-        tags$small(class = "text-muted", hint)
-      ),
-      tags$td(upperInput),
-      tags$td(speedInput)
-    )
-  })
-  bodyRows <- if (length(rows) > 0) do.call(tagList, rows) else NULL
-  tags$table(
-    class = "table table-condensed table-striped",
-    header,
-    tags$tbody(bodyRows)
-  )
-})
 
 # Validation observer
 observe(
   {
     amErrorAction(title = "Flood land cover validation", {
-      count <- listen$floodLcIntervalCount
-      if (is.null(count) || count < 2) count <- 2
+      intervals <- collectFloodLcIntervals()
+      count <- nrow(intervals)
       dbCon <- isolate(grassSession$dbCon)
-      thresholds <- if (count > 1) {
-        vapply(seq_len(count - 1), function(i) safeNumeric(input[[paste0("floodLc_threshold_", i)]]), numeric(1))
-      } else {
-        numeric(0)
-      }
-      speeds <- if (count > 1) {
-        c(1, vapply(seq(2, count), function(i) safeNumeric(input[[paste0("floodLc_speed_", i)]]), numeric(1)))
-      } else {
-        c(1)
-      }
+      thresholds <- if (count > 1) intervals$upper[seq_len(count - 1)] else numeric(0)
+      speeds <- intervals$speed
       err <- character(0)
       info <- character(0)
       disableGenerate <- TRUE
@@ -447,14 +558,15 @@ observeEvent(input$btnFloodLcGenerate,
       )
 
       rulesFile <- tempfile()
-      writeLines(
-        sprintf("%d:%s", offsets, labelHuman),
-        con = rulesFile
-      )
-      execGRASS("r.category", map = outFlood, rules = rulesFile)
+      labelCategory <- intervalMeta$labelCategory
+      labelCategory[is.na(labelCategory) | labelCategory == ""] <- sprintf("cat_%d", offsets[is.na(labelCategory) | labelCategory == ""])
+      labelCategory <- gsub(":", "_", labelCategory, fixed = TRUE)
+      ruleLines <- sprintf("%d:%s", as.integer(offsets), labelCategory)
+      writeLines(ruleLines, con = rulesFile)
+      execGRASS("r.category", map = outFlood, separator = ":", rules = rulesFile)
       colorFlood <- amClassListInfo("rFloodIntervals", "colors")
       if (isNotEmpty(colorFlood)) {
-        execGRASS("r.colors", map = outFlood, color = colorFlood[1])
+        applyGrassColor(outFlood, colorFlood[1])
       }
 
       pbc(
@@ -537,7 +649,7 @@ observeEvent(input$btnFloodLcGenerate,
       execGRASS("r.category", map = outMerged, rules = catRules)
       colorMerged <- amClassListInfo("rLandCoverFloodMerged", "colors")
       if (isNotEmpty(colorMerged)) {
-        execGRASS("r.colors", map = outMerged, color = colorMerged[1])
+        applyGrassColor(outMerged, colorMerged[1])
       }
 
       amUpdateDataList(listen)

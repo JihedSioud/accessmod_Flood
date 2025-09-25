@@ -58,7 +58,10 @@ tags$div(
         class = "help-block",
         amt(id = "toolbox_flood_lc_intervals_hint")
       ),
-      uiOutput("floodLcIntervals"),
+      tabulator_output(
+        "floodLcIntervalsTable",
+        height = "250px"
+      ),
       div(
         class = "btn-group",
         actionButton(
