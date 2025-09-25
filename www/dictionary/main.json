@@ -5056,6 +5056,14 @@
     "pt": "Criar cobertura do solo com inundação"
   },
   {
+    "id": "tools_inspect_tables_btn",
+    "en": "Inspect tables",
+    "fr": "Inspecter les tables",
+    "es": "Inspeccionar tablas",
+    "de": "",
+    "pt": "Inspecionar tabelas"
+  },
+  {
     "id": "toolbox_flood_lc_title",
     "en": "Create land cover with flood",
     "fr": "Créer une occupation du sol avec inondation",
@@ -5118,6 +5126,38 @@
     "es": "Configure umbrales de inundación ordenados y modificadores de velocidad.",
     "de": "",
     "pt": "Configurar limites de inundação ordenados e modificadores de velocidade."
+  },
+  {
+    "id": "inspect_tables_title",
+    "en": "Inspect tables",
+    "fr": "Inspecter les tables",
+    "es": "Inspeccionar tablas",
+    "de": "",
+    "pt": "Inspecionar tabelas"
+  },
+  {
+    "id": "inspect_tables_select_label",
+    "en": "Choose a table",
+    "fr": "Choisir une table",
+    "es": "Elegir una tabla",
+    "de": "",
+    "pt": "Escolher uma tabela"
+  },
+  {
+    "id": "inspect_tables_rows_label",
+    "en": "Rows to preview",
+    "fr": "Lignes à prévisualiser",
+    "es": "Filas a previsualizar",
+    "de": "",
+    "pt": "Linhas para pré-visualizar"
+  },
+  {
+    "id": "inspect_tables_no_selection",
+    "en": "Select a table to preview its contents.",
+    "fr": "Sélectionnez une table pour prévisualiser son contenu.",
+    "es": "Seleccione una tabla para previsualizar su contenido.",
+    "de": "",
+    "pt": "Selecione uma tabela para pré-visualizar o conteúdo."
   },
   {
     "id": "toolbox_flood_lc_add_interval",
